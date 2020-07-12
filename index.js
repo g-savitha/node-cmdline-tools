@@ -1,28 +1,34 @@
 #!/usr/bin/env node
 
 const fs = require("fs");
+const util = require("util");
 
-fs.readdir(process.cwd(), (err, filenames) => {
+//#2 use util.promisify to wrap lstat in promise
+//const lstat = util.promisify(fs.lstat);
+
+//#3  fs.promises.lstat
+// const lstat = fs.promises.lstat; or
+const { lstat } = fs.promises;
+
+fs.readdir(process.cwd(), async (err, filenames) => {
   if (err) throw new Error(err);
-  let allStats = Array(filenames.length).fill(null);
-
   for (let file of filenames) {
-    const idx = filenames.indexOf(file);
-    fs.lstat(file, (err, stats) => {
-      if (err) throw new Error(err);
-
-      allStats[idx] = stats;
-      // returns true when none of the elements in array are null
-      const ready = allStats.every((stats) => {
-        return stats;
-      });
-
-      if (ready) {
-        allStats.forEach((stats, idx) => {
-          console.log(filenames[idx], stats.isFile());
-        });
-      }
-    });
-    console.log();
+    try {
+      const stats = await lstat(file);
+      console.log(file, stats.isFile());
+    } catch (err) {
+      console.log("error : ", err);
+    }
   }
 });
+
+// #1 : wrap lstat function in promise
+// const lstat = (filenames) => {
+//   return new Promise((resolve, reject) => {
+//     fs.lstat(filenames, (err, stats) => {
+//       if (err) reject(err);
+
+//       resolve(stats);
+//     });
+//   });
+// };
