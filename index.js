@@ -4,6 +4,7 @@ const fs = require("fs");
 const util = require("util");
 const chalk = require("chalk");
 const log = console.log;
+const path = require("path");
 
 //#2 use util.promisify to wrap lstat in promise
 //const lstat = util.promisify(fs.lstat);
@@ -12,10 +13,12 @@ const log = console.log;
 // const lstat = fs.promises.lstat; or
 const { lstat } = fs.promises;
 
-fs.readdir(process.cwd(), async (err, filenames) => {
+const targetDir = process.argv[2] || process.cwd();
+console.log(path.dirname(targetDir));
+fs.readdir(targetDir, async (err, filenames) => {
   if (err) throw new Error(err);
   const statPromises = filenames.map((file) => {
-    return lstat(file);
+    return lstat(path.join(targetDir, file));
   });
 
   const allStats = await Promise.all(statPromises);
