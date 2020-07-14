@@ -2,6 +2,8 @@
 
 const fs = require("fs");
 const util = require("util");
+const chalk = require("chalk");
+const log = console.log;
 
 //#2 use util.promisify to wrap lstat in promise
 //const lstat = util.promisify(fs.lstat);
@@ -20,8 +22,8 @@ fs.readdir(process.cwd(), async (err, filenames) => {
 
   for (let stats of allStats) {
     const idx = allStats.indexOf(stats);
-
-    console.log(filenames[idx], stats.isFile());
+    if (stats.isFile()) log(chalk.blue(filenames[idx]));
+    else log(chalk.red.bold(filenames[idx]));
   }
 });
 
